@@ -116,7 +116,7 @@ const connectDB = async () => {
         await initDatabase();
     } catch (error) {
         console.error('MySQL connection error:', error.message);
-        process.exit(1);
+        console.warn('⚠️ Server will stay running, but please provide valid database credentials in your environment variables.');
     }
 };
 
