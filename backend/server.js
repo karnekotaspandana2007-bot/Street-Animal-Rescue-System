@@ -34,7 +34,8 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.get('/api/health', (req, res) => {
     res.json({
         success: true,
-        message: "Smart Street Animal Rescue API is running"
+        message: "Smart Street Animal Rescue API is running",
+        version: "v2-zero-config-db"
     });
 });
 
