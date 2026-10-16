@@ -37,17 +37,37 @@ if (validUri) {
     };
 }
 
-let pool;
+const { localPool, ensureData } = require('./localStore');
+
+let useLocal = false;
+let mysqlPool;
 try {
-    pool = mysql.createPool(poolConfig);
+    mysqlPool = mysql.createPool(poolConfig);
 } catch (err) {
-    console.error('Failed to create MySQL pool:', err.message);
-    pool = {
-        execute: async () => { throw new Error('Database not configured properly: ' + err.message); },
-        query: async () => { throw new Error('Database not configured properly: ' + err.message); },
-        getConnection: async () => { throw new Error('Database not configured properly: ' + err.message); }
-    };
+    useLocal = true;
 }
+
+const pool = {
+    async execute(sql, params) {
+        if (useLocal) {
+            return localPool.execute(sql, params);
+        }
+        try {
+            return await mysqlPool.execute(sql, params);
+        } catch (err) {
+            if (err.code === 'ECONNREFUSED' || err.code === 'ER_ACCESS_DENIED_ERROR' || err.code === 'ENOTFOUND') {
+                console.warn('⚠️ MySQL query failed, switching to embedded database store:', err.message);
+                useLocal = true;
+                return localPool.execute(sql, params);
+            }
+            throw err;
+        }
+    },
+    async getConnection() {
+        if (useLocal) return localPool.getConnection();
+        return mysqlPool.getConnection();
+    }
+};
 
 const initDatabase = async () => {
     try {
@@ -131,13 +151,15 @@ const initDatabase = async () => {
 
 const connectDB = async () => {
     try {
-        const connection = await pool.getConnection();
+        const connection = await mysqlPool.getConnection();
         console.log('MySQL Connected Successfully');
         connection.release();
         await initDatabase();
     } catch (error) {
-        console.error('MySQL connection error:', error.message);
-        console.warn('⚠️ Server will stay running, but please provide valid database credentials in your environment variables.');
+        console.warn('⚠️ MySQL not reachable (' + error.message + '). Automatically activating embedded database fallback for cloud deployment.');
+        useLocal = true;
+        ensureData();
+        console.log('Embedded Database Store Activated Successfully (Users and Reports ready).');
     }
 };
 
