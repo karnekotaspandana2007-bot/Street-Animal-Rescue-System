@@ -39,6 +39,15 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Global error handling middleware - ensures all errors are returned as JSON
+app.use((err, req, res, next) => {
+    console.error('Unhandled server error:', err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Server error occurred'
+    });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
