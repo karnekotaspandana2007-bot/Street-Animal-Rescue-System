@@ -5,10 +5,21 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 let poolConfig;
+const rawUri = process.env.MYSQL_URL || process.env.DATABASE_URL;
+let validUri = null;
 
-if (process.env.MYSQL_URL || process.env.DATABASE_URL) {
+if (rawUri && !rawUri.includes('host:port') && !rawUri.includes('your_') && !rawUri.includes('user:password')) {
+    try {
+        new URL(rawUri);
+        validUri = rawUri;
+    } catch (e) {
+        console.warn('⚠️ Invalid MYSQL_URL provided, falling back to host/user config.');
+    }
+}
+
+if (validUri) {
     poolConfig = {
-        uri: process.env.MYSQL_URL || process.env.DATABASE_URL,
+        uri: validUri,
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0
@@ -17,16 +28,26 @@ if (process.env.MYSQL_URL || process.env.DATABASE_URL) {
     poolConfig = {
         host: process.env.DB_HOST || process.env.MYSQLHOST || 'localhost',
         user: process.env.DB_USER || process.env.MYSQLUSER || 'root',
-        password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || 'Venkatrao@22',
+        password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '',
         database: process.env.DB_NAME || process.env.MYSQLDATABASE || 'smart_animal_rescue',
-        port: Number(process.env.DB_PORT || process.env.MYSQLPORT || 3306),
+        port: Number(process.env.DB_PORT || process.env.MYSQLPORT || 3306) || 3306,
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0
     };
 }
 
-const pool = mysql.createPool(poolConfig);
+let pool;
+try {
+    pool = mysql.createPool(poolConfig);
+} catch (err) {
+    console.error('Failed to create MySQL pool:', err.message);
+    pool = {
+        execute: async () => { throw new Error('Database not configured properly: ' + err.message); },
+        query: async () => { throw new Error('Database not configured properly: ' + err.message); },
+        getConnection: async () => { throw new Error('Database not configured properly: ' + err.message); }
+    };
+}
 
 const initDatabase = async () => {
     try {
