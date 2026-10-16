@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Smart Street Animal Rescue</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+    
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Smart Rescue</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                    <li><a href="report-animal.html">Report Animal</a></li>
+                    <li><a href="my-reports.html">My Reports</a></li>
+                    <li><a href="nearby-centers.html">Nearby Centers</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" onclick="logout()" class="btn btn-block btn-outline" style="border-color: rgba(255,255,255,0.3); color: white;">Logout</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="menu-toggle" id="menu-toggle">☰</div>
+                <div class="user-info">
+                    <span id="user-name">Welcome</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="page-title">
+                    <h1>Dashboard</h1>
+                    <a href="report-animal.html" class="btn btn-primary" style="padding: 15px 30px; font-size: 18px;">+ REPORT AN ANIMAL</a>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary">📝</div>
+                        <div class="stat-info">
+                            <h3 id="total-reports">0</h3>
+                            <p>Total Reports</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning">⏳</div>
+                        <div class="stat-info">
+                            <h3 id="pending-reports">0</h3>
+                            <p>Pending Reports</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-secondary">🚑</div>
+                        <div class="stat-info">
+                            <h3 id="active-rescues">0</h3>
+                            <p>Active Rescues</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success">✅</div>
+                        <div class="stat-info">
+                            <h3 id="completed-rescues">0</h3>
+                            <p>Completed Rescues</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>Recent Reports</h2>
+                <div class="report-grid" id="recent-reports-container">
+                    <p>Loading reports...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth('user');
+            if (user) {
+                document.getElementById('user-name').textContent = `Welcome, ${user.name}`;
+                
+                // Fetch stats (mocked logic based on my reports)
+                try {
+                    const response = await apiGet('/reports/my');
+                    const reports = response.data;
+                    
+                    document.getElementById('total-reports').textContent = reports.length;
+                    document.getElementById('pending-reports').textContent = reports.filter(r => r.status === 'Pending').length;
+                    document.getElementById('active-rescues').textContent = reports.filter(r => ['Assigned', 'Rescue In Progress'].includes(r.status)).length;
+                    document.getElementById('completed-rescues').textContent = reports.filter(r => ['Completed', 'Rescued'].includes(r.status)).length;
+
+                    // Display recent 3 reports
+                    const container = document.getElementById('recent-reports-container');
+                    container.innerHTML = '';
+                    
+                    if (reports.length === 0) {
+                        container.innerHTML = '<p>You have not made any reports yet.</p>';
+                    } else {
+                        reports.slice(0, 3).forEach(report => {
+                            let badgeClass = 'badge-pending';
+                            if (report.status === 'Verified') badgeClass = 'badge-verified';
+                            if (report.status === 'Assigned') badgeClass = 'badge-assigned';
+                            if (report.status === 'Rescue In Progress') badgeClass = 'badge-progress';
+                            if (report.status === 'Completed' || report.status === 'Rescued') badgeClass = 'badge-completed';
+                            
+                            container.innerHTML += `
+                                <div class="report-card">
+                                    <img src="http://localhost:5000${report.image}" alt="${report.animalType}" class="report-img" onerror="this.src='../assets/images/placeholder.jpg'">
+                                    <div class="report-details">
+                                        <div class="report-header">
+                                            <h3>${report.animalType}</h3>
+                                            <span class="badge ${badgeClass}">${report.status}</span>
+                                        </div>
+                                        <div class="report-info">
+                                            <strong>Condition:</strong> ${report.condition} <br>
+                                            <strong>Location:</strong> ${report.address}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching reports', error);
+                }
+            }
+
+            // Mobile menu toggle
+            document.getElementById('menu-toggle').addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>

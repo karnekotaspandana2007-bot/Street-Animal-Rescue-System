@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nearby Rescue Centers - Smart Street Animal Rescue</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+    
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Smart Rescue</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="report-animal.html">Report Animal</a></li>
+                    <li><a href="my-reports.html">My Reports</a></li>
+                    <li><a href="nearby-centers.html" class="active">Nearby Centers</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" onclick="logout()" class="btn btn-block btn-outline" style="border-color: rgba(255,255,255,0.3); color: white;">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="menu-toggle" id="menu-toggle">☰</div>
+                <div class="user-info">
+                    <span id="user-name">Welcome</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="page-title">
+                    <h1>Nearby Rescue Centers</h1>
+                </div>
+
+                <div class="data-card text-center mb-2">
+                    <p>Find animal hospitals and rescue centers near your location.</p>
+                    <button id="btn-find-centers" class="btn btn-primary mt-1">FIND NEARBY CENTERS</button>
+                    <p id="location-status" class="mt-1" style="color: #666;"></p>
+                </div>
+
+                <div class="report-grid" id="centers-container">
+                    <!-- Mock centers will be populated here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = checkAuth('user');
+            if (user) {
+                document.getElementById('user-name').textContent = `Welcome, ${user.name}`;
+            }
+
+            document.getElementById('menu-toggle').addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('active');
+            });
+
+            document.getElementById('btn-find-centers').addEventListener('click', () => {
+                const status = document.getElementById('location-status');
+                const container = document.getElementById('centers-container');
+                
+                status.textContent = 'Getting your location...';
+                
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            status.textContent = 'Location found! Showing nearby centers.';
+                            
+                            // Mock data for nearby centers
+                            const mockCenters = [
+                                { name: "City Animal Hospital", address: "123 Main St", phone: "+1-234-567-8901", dist: "1.2 km" },
+                                { name: "Hope Rescue Shelter", address: "456 Park Ave", phone: "+1-234-567-8902", dist: "3.5 km" },
+                                { name: "Emergency Vet Clinic", address: "789 Oak Road", phone: "+1-234-567-8903", dist: "5.0 km" }
+                            ];
+                            
+                            container.innerHTML = '';
+                            mockCenters.forEach(center => {
+                                const lat = position.coords.latitude + (Math.random() - 0.5) * 0.1;
+                                const lng = position.coords.longitude + (Math.random() - 0.5) * 0.1;
+                                const mapUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`;
+                                
+                                container.innerHTML += `
+                                    <div class="report-card">
+                                        <div class="report-details">
+                                            <h3>${center.name}</h3>
+                                            <div class="report-info mt-1">
+                                                <strong>Address:</strong> ${center.address} <br>
+                                                <strong>Phone:</strong> ${center.phone} <br>
+                                                <strong>Distance:</strong> ~${center.dist}
+                                            </div>
+                                            <a href="${mapUrl}" target="_blank" class="btn btn-outline btn-block mt-1">View on Map</a>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        },
+                        (error) => {
+                            status.textContent = 'Could not get location. Showing default centers.';
+                            // Show default anyway
+                        }
+                    );
+                }
+            });
+        });
+    </script>
+</body>
+</html>

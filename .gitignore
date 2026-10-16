@@ -1,0 +1,20 @@
+# Node modules
+node_modules/
+npm-debug.log
+
+# Environment variables
+.env
+.env.*
+!.env.example
+backend/token.txt
+
+# Local database data
+backend/data/db.json
+
+# Uploads
+backend/uploads/animal-reports/*
+!backend/uploads/animal-reports/.gitkeep
+
+# OS generated files
+.DS_Store
+Thumbs.db

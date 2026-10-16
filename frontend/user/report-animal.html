@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Animal - Smart Street Animal Rescue</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+    
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Smart Rescue</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="report-animal.html" class="active">Report Animal</a></li>
+                    <li><a href="my-reports.html">My Reports</a></li>
+                    <li><a href="nearby-centers.html">Nearby Centers</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" onclick="logout()" class="btn btn-block btn-outline" style="border-color: rgba(255,255,255,0.3); color: white;">Logout</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="menu-toggle" id="menu-toggle">☰</div>
+                <div class="user-info">
+                    <span id="user-name">Welcome</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="page-title">
+                    <h1>Report an Animal in Need</h1>
+                </div>
+
+                <div class="data-card" style="max-width: 800px; margin: 0 auto;">
+                    <div id="form-alert" class="alert hidden"></div>
+
+                    <form id="report-form">
+                        <!-- Step 1: Image -->
+                        <h3>1. Animal Photo</h3>
+                        <div class="camera-container">
+                            <video id="camera-video" autoplay playsinline class="hidden"></video>
+                            <canvas id="camera-canvas" class="hidden"></canvas>
+                            <img id="photo-preview" class="hidden" alt="Preview">
+                            
+                            <div class="camera-controls">
+                                <button type="button" id="btn-start-camera" class="btn btn-outline">Open Camera</button>
+                                <button type="button" id="btn-capture" class="btn btn-primary hidden">Capture Photo</button>
+                                <button type="button" id="btn-retake" class="btn btn-secondary hidden">Retake</button>
+                            </div>
+                            
+                            <div style="margin-top: 15px;">
+                                <span>OR</span>
+                                <input type="file" id="image-upload" accept="image/*" style="display: block; margin: 10px auto;">
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Details -->
+                        <h3>2. Details</h3>
+                        <div class="form-group">
+                            <label>Animal Type</label>
+                            <select id="animalType" class="form-control" required>
+                                <option value="">Select Type</option>
+                                <option value="Dog">Dog</option>
+                                <option value="Cat">Cat</option>
+                                <option value="Cow">Cow</option>
+                                <option value="Bird">Bird</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Condition</label>
+                            <select id="condition" class="form-control" required>
+                                <option value="">Select Condition</option>
+                                <option value="Injured">Injured</option>
+                                <option value="Sick">Sick</option>
+                                <option value="Trapped">Trapped</option>
+                                <option value="Abandoned">Abandoned</option>
+                                <option value="Accident">Accident</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Severity</label>
+                            <select id="severity" class="form-control" required>
+                                <option value="">Select Severity</option>
+                                <option value="Low">Low (Safe but needs help)</option>
+                                <option value="Medium">Medium (Pain/Discomfort)</option>
+                                <option value="High">High (Severe bleeding/fracture)</option>
+                                <option value="Critical">Critical (Life threatening)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="description" class="form-control" placeholder="Provide additional details..." required></textarea>
+                        </div>
+
+                        <!-- Step 3: Location -->
+                        <h3>3. Location</h3>
+                        <div id="location-error" class="alert alert-danger hidden"></div>
+                        <button type="button" id="btn-get-location" class="btn btn-secondary btn-block mb-2">USE MY CURRENT LOCATION</button>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="text" id="latitude" class="form-control" placeholder="Latitude" readonly required>
+                            <input type="text" id="longitude" class="form-control" placeholder="Longitude" readonly required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Address (Auto-filled or manual)</label>
+                            <input type="text" id="address" class="form-control" placeholder="Enter nearest landmark or address" required>
+                        </div>
+
+                        <button type="submit" id="btn-submit" class="btn btn-primary btn-block" style="font-size: 18px; padding: 15px;">SUBMIT ANIMAL REPORT</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/location.js"></script>
+    <script src="../js/report.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = checkAuth('user');
+            if (user) {
+                document.getElementById('user-name').textContent = `Welcome, ${user.name}`;
+            }
+            
+            // Setup location button from location.js
+            setupLocationButton('btn-get-location', 'latitude', 'longitude', 'address', 'location-error');
+
+            // Mobile menu toggle
+            document.getElementById('menu-toggle').addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>

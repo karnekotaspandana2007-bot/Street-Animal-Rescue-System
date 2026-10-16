@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Reports - Smart Street Animal Rescue</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .report-img-small {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Portal</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="reports.html" class="active">Manage Reports</a></li>
+                    <li><a href="users.html">Manage Users</a></li>
+                    <li><a href="rescuers.html">Manage Rescuers</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="menu-toggle" id="menu-toggle">☰</div>
+                <div class="user-info">
+                    <span id="user-name">Admin</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="page-title">
+                    <h1>Manage Animal Reports</h1>
+                </div>
+
+                <div id="alert-msg" class="alert hidden"></div>
+
+                <div class="data-card">
+                    <div style="overflow-x: auto;">
+                        <table id="reports-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Type</th>
+                                    <th>Reporter</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="6">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Assign Rescuer Modal -->
+    <div id="assignModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:white; padding:30px; border-radius:8px; width:100%; max-width:400px;">
+            <h2>Assign Rescuer</h2>
+            <div class="form-group mt-2">
+                <label>Select Rescuer</label>
+                <select id="rescuer-select" class="form-control">
+                    <option value="">Loading rescuers...</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button id="btn-confirm-assign" class="btn btn-primary btn-block">ASSIGN</button>
+                <button onclick="document.getElementById('assignModal').style.display='none'" class="btn btn-secondary btn-block">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth('admin');
+            let currentReportId = null;
+            
+            if (user) {
+                document.getElementById('user-name').textContent = user.name;
+                
+                const loadReports = async () => {
+                    try {
+                        const response = await apiGet('/admin/reports');
+                        const reports = response.data;
+                        const tbody = document.querySelector('#reports-table tbody');
+                        tbody.innerHTML = '';
+                        
+                        if (reports.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No reports found</td></tr>';
+                        } else {
+                            reports.forEach(report => {
+                                let badgeClass = 'badge-pending';
+                                if (report.status === 'Verified') badgeClass = 'badge-verified';
+                                if (report.status === 'Assigned') badgeClass = 'badge-assigned';
+                                if (report.status === 'Rescue In Progress') badgeClass = 'badge-progress';
+                                if (report.status === 'Completed' || report.status === 'Rescued') badgeClass = 'badge-completed';
+                                if (report.status === 'Rejected') badgeClass = 'badge-rejected';
+                                
+                                let actions = '';
+                                if (report.status === 'Pending') {
+                                    actions = `
+                                        <button onclick="verifyReport('${report._id}')" class="action-btn btn-verify">Verify</button>
+                                        <button onclick="rejectReport('${report._id}')" class="action-btn btn-reject">Reject</button>
+                                    `;
+                                } else if (report.status === 'Verified') {
+                                    actions = `<button onclick="openAssignModal('${report._id}')" class="action-btn btn-assign">Assign Rescuer</button>`;
+                                } else if (report.status === 'Assigned' || report.status === 'Rescue In Progress') {
+                                    actions = `<span style="font-size:12px; color:#666;">Assigned to: ${report.assignedRescuer ? report.assignedRescuer.name : 'Unknown'}</span>`;
+                                }
+
+                                tbody.innerHTML += `
+                                    <tr>
+                                        <td><img src="http://localhost:5000${report.image}" class="report-img-small" onerror="this.src='../assets/images/placeholder.jpg'"></td>
+                                        <td>${report.animalType}<br><small>${report.condition}</small></td>
+                                        <td>${report.userId ? report.userId.name : 'Unknown'}<br><small>${report.userId ? report.userId.phone : ''}</small></td>
+                                        <td><span title="${report.address}">${report.address.substring(0, 30)}...</span></td>
+                                        <td><span class="badge ${badgeClass}">${report.status}</span></td>
+                                        <td>${actions}</td>
+                                    </tr>
+                                `;
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error fetching reports', error);
+                        document.querySelector('#reports-table tbody').innerHTML = `<tr><td colspan="6" class="text-center text-danger">${error.message}</td></tr>`;
+                    }
+                };
+                
+                await loadReports();
+                
+                // Fetch rescuers for modal
+                try {
+                    const rescuerRes = await apiGet('/admin/rescuers');
+                    const rescuers = rescuerRes.data;
+                    const select = document.getElementById('rescuer-select');
+                    select.innerHTML = '<option value="">-- Select Rescuer --</option>';
+                    rescuers.forEach(r => {
+                        select.innerHTML += `<option value="${r._id}">${r.name} (${r.location})</option>`;
+                    });
+                } catch (e) {
+                    console.error('Could not load rescuers');
+                }
+
+                window.verifyReport = async (id) => {
+                    try {
+                        await apiPut(`/admin/reports/${id}/verify`);
+                        showAlert('Report verified', 'success');
+                        loadReports();
+                    } catch (err) {
+                        showAlert(err.message, 'danger');
+                    }
+                };
+
+                window.rejectReport = async (id) => {
+                    if (confirm('Are you sure you want to reject this report?')) {
+                        try {
+                            await apiPut(`/admin/reports/${id}/reject`);
+                            showAlert('Report rejected', 'success');
+                            loadReports();
+                        } catch (err) {
+                            showAlert(err.message, 'danger');
+                        }
+                    }
+                };
+
+                window.openAssignModal = (id) => {
+                    currentReportId = id;
+                    document.getElementById('assignModal').style.display = 'flex';
+                };
+
+                document.getElementById('btn-confirm-assign').addEventListener('click', async () => {
+                    const rescuerId = document.getElementById('rescuer-select').value;
+                    if (!rescuerId) return alert('Please select a rescuer');
+                    
+                    try {
+                        await apiPut(`/admin/reports/${currentReportId}/assign`, { rescuerId });
+                        document.getElementById('assignModal').style.display = 'none';
+                        showAlert('Rescuer assigned successfully', 'success');
+                        loadReports();
+                    } catch (err) {
+                        alert(err.message);
+                    }
+                });
+
+                function showAlert(msg, type) {
+                    const alertDiv = document.getElementById('alert-msg');
+                    alertDiv.textContent = msg;
+                    alertDiv.className = `alert alert-${type}`;
+                    alertDiv.classList.remove('hidden');
+                    setTimeout(() => alertDiv.classList.add('hidden'), 3000);
+                }
+            }
+
+            document.getElementById('menu-toggle').addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>

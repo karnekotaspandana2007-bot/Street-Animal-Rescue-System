@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assigned Reports - Smart Street Animal Rescue</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+    
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Rescuer Portal</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="assigned-reports.html" class="active">Assigned Reports</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" onclick="logout()" class="btn btn-block btn-outline" style="border-color: rgba(255,255,255,0.3); color: white;">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="menu-toggle" id="menu-toggle">☰</div>
+                <div class="user-info">
+                    <span id="user-name">Welcome</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="page-title">
+                    <h1>All Assigned Reports</h1>
+                </div>
+
+                <div class="report-grid" id="reports-container">
+                    <p>Loading reports...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth('rescuer');
+            if (user) {
+                document.getElementById('user-name').textContent = `Welcome, ${user.name}`;
+                
+                try {
+                    const response = await apiGet('/rescuer/reports');
+                    const reports = response.data;
+                    const container = document.getElementById('reports-container');
+                    
+                    container.innerHTML = '';
+                    
+                    if (reports.length === 0) {
+                        container.innerHTML = '<p>You have no assigned reports.</p>';
+                    } else {
+                        reports.forEach(report => {
+                            let badgeClass = 'badge-assigned';
+                            if (report.status === 'Rescue In Progress') badgeClass = 'badge-progress';
+                            if (report.status === 'Completed' || report.status === 'Rescued') badgeClass = 'badge-completed';
+                            
+                            const date = new Date(report.createdAt).toLocaleDateString();
+                            
+                            container.innerHTML += `
+                                <div class="report-card">
+                                    <img src="http://localhost:5000${report.image}" alt="${report.animalType}" class="report-img" onerror="this.src='../assets/images/placeholder.jpg'">
+                                    <div class="report-details">
+                                        <div class="report-header">
+                                            <h3>${report.animalType}</h3>
+                                            <span class="badge ${badgeClass}">${report.status}</span>
+                                        </div>
+                                        <div class="report-info">
+                                            <strong>Condition:</strong> ${report.condition} (${report.severity}) <br>
+                                            <strong>Location:</strong> ${report.address} <br>
+                                            <strong>Date:</strong> ${date}
+                                        </div>
+                                        <a href="rescue-details.html?id=${report._id}" class="btn btn-primary btn-block mt-2">VIEW DETAILS</a>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching reports', error);
+                    document.getElementById('reports-container').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                }
+            }
+
+            document.getElementById('menu-toggle').addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>

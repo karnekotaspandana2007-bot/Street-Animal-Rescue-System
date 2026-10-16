@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Street Animal Rescue System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1548802673-380ab8ebc7b7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 0 20px;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+        
+        .hero-btns {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .hero-btns .btn {
+            font-size: 1.2rem;
+            padding: 15px 30px;
+        }
+
+        .features {
+            padding: 80px 20px;
+            background-color: var(--light-bg);
+            text-align: center;
+        }
+
+        .features h2 {
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: var(--dark);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .feature-card h3 {
+            color: var(--primary-color);
+            margin: 15px 0;
+        }
+
+        .recent-reports {
+            padding: 80px 20px;
+            background-color: #f9f9f9;
+        }
+        .recent-reports h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: var(--dark);
+        }
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .report-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .report-card:hover {
+            transform: translateY(-5px);
+        }
+        .report-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        .report-content {
+            padding: 20px;
+        }
+        .report-title {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .report-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .report-desc {
+            margin-bottom: 15px;
+            color: #444;
+            line-height: 1.5;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .badge-Pending { background: #ffeaa7; color: #d35400; }
+        .badge-Assigned { background: #74b9ff; color: #0984e3; }
+        .badge-Rescued, .badge-Completed { background: #55efc4; color: #00b894; }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <div class="container">
+            <h1>SMART STREET ANIMAL RESCUE</h1>
+            <p>"Report. Rescue. Protect."</p>
+            <div class="hero-btns">
+                <a href="login.html" class="btn btn-primary">REPORT AN ANIMAL</a>
+                <a href="login.html" class="btn btn-secondary">LOGIN</a>
+                <a href="register.html" class="btn btn-outline" style="color: white; border-color: white;">REGISTER</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="features">
+        <div class="container">
+            <h2>HOW IT WORKS</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>1. Report</h3>
+                    <p>Use our web app to open your camera and take a picture of the animal in need.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>2. Locate</h3>
+                    <p>We automatically fetch your GPS coordinates to pinpoint the animal's exact location.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>3. Rescue</h3>
+                    <p>Verified reports are instantly assigned to nearby volunteer rescuers.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>4. Recover</h3>
+                    <p>Track the rescue status in real-time until the animal is safely recovered.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="recent-reports">
+        <div class="container">
+            <h2>RECENT RESCUE REPORTS</h2>
+            <div class="report-grid" id="public-reports">
+                <!-- Reports will be injected here via JS -->
+                <p style="text-align: center; width: 100%;">Loading reports...</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const reportsContainer = document.getElementById('public-reports');
+            try {
+                const response = await fetch(`${BASE_URL}/reports`);
+                const data = await response.json();
+                
+                if(data.success) {
+                    if(data.data.length === 0) {
+                        reportsContainer.innerHTML = '<p style="text-align:center; width:100%;">No reports found yet.</p>';
+                        return;
+                    }
+
+                    reportsContainer.innerHTML = data.data.map(report => {
+                        let icon = report.animalType === 'Dog' ? '🐕' : (report.animalType === 'Cat' ? '🐈' : '🐾');
+                        let reporterName = report.userId ? report.userId.name : 'Anonymous';
+                        return `
+                            <div class="report-card">
+                                <img src="http://localhost:5000${report.image}" class="report-img" alt="${report.animalType}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                                <div class="report-content">
+                                    <div class="report-title">${icon} ${report.animalType || 'Animal'}</div>
+                                    <div class="report-meta">
+                                        <strong>Reported by:</strong> ${reporterName}<br>
+                                        <strong>Location:</strong> ${report.address || 'Unknown'}<br>
+                                        <strong>Date:</strong> ${new Date(report.createdAt).toLocaleDateString()}
+                                    </div>
+                                    <div class="report-desc">"${report.description}"</div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                                        <span class="badge badge-${report.status}">${report.status}</span>
+                                        <a href="login.html" style="color:var(--primary-color); text-decoration:none; font-weight:bold;">View Details &rarr;</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error(err);
+                reportsContainer.innerHTML = '<p style="text-align:center; width:100%; color:red;">Failed to load reports.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

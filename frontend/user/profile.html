@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Smart Street Animal Rescue</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+    
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Smart Rescue</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="report-animal.html">Report Animal</a></li>
+                    <li><a href="my-reports.html">My Reports</a></li>
+                    <li><a href="nearby-centers.html">Nearby Centers</a></li>
+                    <li><a href="profile.html" class="active">Profile</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" onclick="logout()" class="btn btn-block btn-outline" style="border-color: rgba(255,255,255,0.3); color: white;">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="menu-toggle" id="menu-toggle">☰</div>
+                <div class="user-info">
+                    <span id="user-name">Welcome</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="page-title">
+                    <h1>My Profile</h1>
+                </div>
+
+                <div class="data-card" style="max-width: 600px; margin: 0 auto;">
+                    <div id="profile-info">
+                        <p>Loading profile...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth('user');
+            if (user) {
+                document.getElementById('user-name').textContent = `Welcome, ${user.name}`;
+                
+                try {
+                    const response = await apiGet('/auth/profile');
+                    const profile = response.data;
+                    
+                    const date = new Date(profile.createdAt).toLocaleDateString();
+                    
+                    document.getElementById('profile-info').innerHTML = `
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div style="width: 100px; height: 100px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 15px;">
+                                ${profile.name.charAt(0).toUpperCase()}
+                            </div>
+                            <h2>${profile.name}</h2>
+                            <span class="badge badge-assigned">${profile.role}</span>
+                        </div>
+                        
+                        <table style="margin-top: 30px;">
+                            <tr>
+                                <th>Email</th>
+                                <td>${profile.email}</td>
+                            </tr>
+                            <tr>
+                                <th>Phone</th>
+                                <td>${profile.phone}</td>
+                            </tr>
+                            <tr>
+                                <th>Location</th>
+                                <td>${profile.location || 'Not provided'}</td>
+                            </tr>
+                            <tr>
+                                <th>Member Since</th>
+                                <td>${date}</td>
+                            </tr>
+                        </table>
+                    `;
+                } catch (error) {
+                    console.error('Error fetching profile', error);
+                    document.getElementById('profile-info').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                }
+            }
+
+            document.getElementById('menu-toggle').addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>
