@@ -123,26 +123,30 @@ const initDatabase = async () => {
 
         // Check and seed default admin
         const [adminRows] = await pool.execute('SELECT id FROM users WHERE email = ?', ['admin@example.com']);
+        const adminHash = await bcrypt.hash('adminpassword123', 10);
         if (adminRows.length === 0) {
             const adminId = crypto.randomUUID();
-            const adminHash = await bcrypt.hash('adminpassword123', 10);
             await pool.execute(
                 `INSERT INTO users (id, name, email, phone, password, role, location) VALUES (?, ?, ?, ?, ?, ?, ?)`,
                 [adminId, 'Admin User', 'admin@example.com', '0000000000', adminHash, 'admin', 'HQ']
             );
             console.log('Default admin seeded.');
+        } else {
+            await pool.execute('UPDATE users SET password = ?, role = "admin" WHERE email = ?', [adminHash, 'admin@example.com']);
         }
 
         // Check and seed default rescuer
         const [rescuerRows] = await pool.execute('SELECT id FROM users WHERE email = ?', ['rescuer@example.com']);
+        const rescuerHash = await bcrypt.hash('rescuerpassword123', 10);
         if (rescuerRows.length === 0) {
             const rescuerId = crypto.randomUUID();
-            const rescuerHash = await bcrypt.hash('rescuerpassword123', 10);
             await pool.execute(
                 `INSERT INTO users (id, name, email, phone, password, role, location) VALUES (?, ?, ?, ?, ?, ?, ?)`,
                 [rescuerId, 'Field Rescuer 1', 'rescuer@example.com', '1111111111', rescuerHash, 'rescuer', 'City Center']
             );
             console.log('Default rescuer seeded.');
+        } else {
+            await pool.execute('UPDATE users SET password = ?, role = "rescuer" WHERE email = ?', [rescuerHash, 'rescuer@example.com']);
         }
     } catch (err) {
         console.error('Error during auto-initialization of DB tables:', err.message);

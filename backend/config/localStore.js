@@ -22,8 +22,9 @@ function ensureData() {
     }
 
     // Check and seed admin
-    if (!data.users.some(u => u.email && u.email.toLowerCase() === 'admin@example.com')) {
-        const adminHash = bcrypt.hashSync('adminpassword123', 10);
+    let admin = data.users.find(u => u.email && u.email.toLowerCase() === 'admin@example.com');
+    const adminHash = bcrypt.hashSync('adminpassword123', 10);
+    if (!admin) {
         data.users.push({
             id: '59ad1ac1-450c-4d68-a18d-977b1aec3665',
             name: 'System Admin',
@@ -34,11 +35,16 @@ function ensureData() {
             location: 'HQ',
             createdAt: new Date().toISOString()
         });
+    } else {
+        // Ensure valid hash always matches adminpassword123
+        admin.password = adminHash;
+        admin.role = 'admin';
     }
 
     // Check and seed rescuer
-    if (!data.users.some(u => u.email && u.email.toLowerCase() === 'rescuer@example.com')) {
-        const rescuerHash = bcrypt.hashSync('rescuerpassword123', 10);
+    let rescuer = data.users.find(u => u.email && u.email.toLowerCase() === 'rescuer@example.com');
+    const rescuerHash = bcrypt.hashSync('rescuerpassword123', 10);
+    if (!rescuer) {
         data.users.push({
             id: 'e09e4fad-69e9-4c6d-ad2a-fa95f1572df2',
             name: 'Field Rescuer 1',
@@ -49,6 +55,10 @@ function ensureData() {
             location: 'Downtown / Central Hub',
             createdAt: new Date().toISOString()
         });
+    } else {
+        // Ensure valid hash always matches rescuerpassword123
+        rescuer.password = rescuerHash;
+        rescuer.role = 'rescuer';
     }
 
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
