@@ -116,7 +116,7 @@
                             
                             container.innerHTML += `
                                 <div class="report-card">
-                                    <img src="http://localhost:5000${report.image}" alt="${report.animalType}" class="report-img" onerror="this.src='../assets/images/placeholder.jpg'">
+                                    <img src="${getImageUrl(report.image)}" alt="${report.animalType}" class="report-img" onerror="this.src='../assets/images/placeholder.jpg'">
                                     <div class="report-details">
                                         <div class="report-header">
                                             <h3>${report.animalType}</h3>

@@ -89,11 +89,14 @@ const localPool = {
         // 2. USERS Queries
         if (upper.startsWith('INSERT INTO USERS')) {
             const [id, name, email, phone, password, role, location] = params;
+            const cleanEmail = String(email || '').trim().toLowerCase();
+            // Remove existing user with same email if present to avoid duplicate ghost records
+            db.users = db.users.filter(u => String(u.email || '').trim().toLowerCase() !== cleanEmail);
             const newUser = {
                 id,
-                name,
-                email,
-                phone,
+                name: String(name || '').trim(),
+                email: cleanEmail,
+                phone: String(phone || '').trim(),
                 password,
                 role: role || 'user',
                 location: location || null,
@@ -105,14 +108,14 @@ const localPool = {
         }
 
         if (upper.startsWith('SELECT * FROM USERS WHERE EMAIL = ?')) {
-            const email = params[0];
-            const found = db.users.filter(u => u.email.toLowerCase() === String(email).toLowerCase());
+            const email = String(params[0] || '').trim().toLowerCase();
+            const found = db.users.filter(u => String(u.email || '').trim().toLowerCase() === email);
             return [found];
         }
 
         if (upper.startsWith('SELECT ID FROM USERS WHERE EMAIL = ?')) {
-            const email = params[0];
-            const found = db.users.filter(u => u.email.toLowerCase() === String(email).toLowerCase()).map(u => ({ id: u.id }));
+            const email = String(params[0] || '').trim().toLowerCase();
+            const found = db.users.filter(u => String(u.email || '').trim().toLowerCase() === email).map(u => ({ id: u.id }));
             return [found];
         }
 

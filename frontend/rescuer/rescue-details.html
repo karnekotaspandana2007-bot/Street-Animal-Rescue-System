@@ -125,7 +125,7 @@
                         document.getElementById('report-content').innerHTML = `
                             <div class="details-grid">
                                 <div>
-                                    <img src="http://localhost:5000${report.image}" class="report-full-img" alt="Animal">
+                                    <img src="${getImageUrl(report.image)}" class="report-full-img" alt="Animal" onerror="this.src='../assets/images/placeholder.jpg'">
                                     <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
                                         <h3>Update Status</h3>
                                         <div style="margin-top: 15px;">

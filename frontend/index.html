@@ -203,7 +203,7 @@
                         let reporterName = report.userId ? report.userId.name : 'Anonymous';
                         return `
                             <div class="report-card">
-                                <img src="http://localhost:5000${report.image}" class="report-img" alt="${report.animalType}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                                <img src="${getImageUrl(report.image)}" class="report-img" alt="${report.animalType}" onerror="this.src='assets/images/placeholder.jpg'">
                                 <div class="report-content">
                                     <div class="report-title">${icon} ${report.animalType || 'Animal'}</div>
                                     <div class="report-meta">

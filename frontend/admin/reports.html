@@ -128,7 +128,7 @@
 
                                 tbody.innerHTML += `
                                     <tr>
-                                        <td><img src="http://localhost:5000${report.image}" class="report-img-small" onerror="this.src='../assets/images/placeholder.jpg'"></td>
+                                        <td><img src="${getImageUrl(report.image)}" class="report-img-small" onerror="this.src='../assets/images/placeholder.jpg'"></td>
                                         <td>${report.animalType}<br><small>${report.condition}</small></td>
                                         <td>${report.userId ? report.userId.name : 'Unknown'}<br><small>${report.userId ? report.userId.phone : ''}</small></td>
                                         <td><span title="${report.address}">${report.address.substring(0, 30)}...</span></td>

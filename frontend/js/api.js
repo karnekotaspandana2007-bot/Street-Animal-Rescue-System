@@ -1,18 +1,30 @@
 // Automatically determine backend API URL
-const getBaseUrl = () => {
+const getBaseOrigin = () => {
     // If running on a deployed cloud host (e.g. onrender.com or custom domain)
     if (window.location.hostname && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
-        return `${window.location.origin}/api`;
+        return window.location.origin;
     }
     // If running directly through Node server on port 5000
     if (window.location.port === '5000') {
-        return `${window.location.origin}/api`;
+        return window.location.origin;
     }
-    // If running on VS Code Live Server (port 5500, 5501, 5502, 3000, etc.) or file:// protocol
-    return 'http://localhost:5000/api';
+    // If running on VS Code Live Server (port 5500, 5501, 5502, etc.) or file:// protocol
+    return 'http://localhost:5000';
 };
 
-const BASE_URL = getBaseUrl();
+const BASE_ORIGIN = getBaseOrigin();
+const BASE_URL = `${BASE_ORIGIN}/api`;
+
+// Helper to reliably construct absolute image URLs whether on Render or localhost
+const getImageUrl = (imagePath) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:')) {
+        return imagePath;
+    }
+    // Ensure leading slash
+    const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    return `${BASE_ORIGIN}${cleanPath}`;
+};
 
 // Helper to get headers
 const getHeaders = (isMultipart = false) => {

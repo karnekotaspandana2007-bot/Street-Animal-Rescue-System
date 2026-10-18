@@ -15,13 +15,17 @@ const generateToken = (id) => {
 // @access  Public
 const registerUser = async (req, res) => {
     try {
-        const { name, email, phone, password, role, location } = req.body;
+        let { name, email, phone, password, role, location } = req.body;
+        
+        email = String(email || '').trim().toLowerCase();
+        name = String(name || '').trim();
+        phone = String(phone || '').trim();
 
         // Check if user exists
         const userExists = await User.findOne({ email });
 
         if (userExists) {
-            return res.status(400).json({ success: false, message: 'User already exists' });
+            return res.status(400).json({ success: false, message: 'User already exists with this email. Please login.' });
         }
 
         // Create user
@@ -31,7 +35,7 @@ const registerUser = async (req, res) => {
             phone,
             password,
             role: role || 'user',
-            location
+            location: location || ''
         });
 
         if (user) {
@@ -52,20 +56,21 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        let { email, password } = req.body;
+        email = String(email || '').trim().toLowerCase();
 
         // Check for user email
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+            return res.status(401).json({ success: false, message: 'Invalid credentials. Please check your email or password.' });
         }
 
         // Check if password matches
         const isMatch = await user.matchPassword(password);
 
         if (!isMatch) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+            return res.status(401).json({ success: false, message: 'Invalid credentials. Please check your email or password.' });
         }
 
         res.json({
