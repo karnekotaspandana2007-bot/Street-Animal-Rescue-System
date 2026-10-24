@@ -55,17 +55,19 @@ const pool = {
         try {
             return await mysqlPool.execute(sql, params);
         } catch (err) {
-            if (err.code === 'ECONNREFUSED' || err.code === 'ER_ACCESS_DENIED_ERROR' || err.code === 'ENOTFOUND') {
-                console.warn('⚠️ MySQL query failed, switching to embedded database store:', err.message);
-                useLocal = true;
-                return localPool.execute(sql, params);
-            }
-            throw err;
+            console.warn('⚠️ MySQL query failed, switching to embedded database store:', err.message);
+            useLocal = true;
+            return localPool.execute(sql, params);
         }
     },
     async getConnection() {
         if (useLocal) return localPool.getConnection();
-        return mysqlPool.getConnection();
+        try {
+            return await mysqlPool.getConnection();
+        } catch (err) {
+            useLocal = true;
+            return localPool.getConnection();
+        }
     }
 };
 
@@ -122,31 +124,53 @@ const initDatabase = async () => {
         `);
 
         // Check and seed default admin
-        const [adminRows] = await pool.execute('SELECT id FROM users WHERE email = ?', ['admin@example.com']);
+        const [adminRows] = await pool.execute('SELECT id FROM users WHERE email = ?', ['admin@gmail.com']);
         const adminHash = await bcrypt.hash('adminpassword123', 10);
         if (adminRows.length === 0) {
-            const adminId = crypto.randomUUID();
+            const adminId = '59ad1ac1-450c-4d68-a18d-977b1aec3665';
             await pool.execute(
-                `INSERT INTO users (id, name, email, phone, password, role, location) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [adminId, 'Admin User', 'admin@example.com', '0000000000', adminHash, 'admin', 'HQ']
+                `INSERT INTO users (id, name, email, phone, password, role, location) VALUES (?, ?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE password = VALUES(password), role = VALUES(role), name = VALUES(name)`,
+                [adminId, 'System Admin', 'admin@gmail.com', '0000000000', adminHash, 'admin', 'HQ']
             );
             console.log('Default admin seeded.');
         } else {
-            await pool.execute('UPDATE users SET password = ?, role = "admin" WHERE email = ?', [adminHash, 'admin@example.com']);
+            await pool.execute('UPDATE users SET password = ?, role = "admin", name = "System Admin" WHERE email = ?', [adminHash, 'admin@gmail.com']);
         }
 
         // Check and seed default rescuer
-        const [rescuerRows] = await pool.execute('SELECT id FROM users WHERE email = ?', ['rescuer@example.com']);
+        const [rescuerRows] = await pool.execute('SELECT id FROM users WHERE email = ?', ['rescuer@gmail.com']);
         const rescuerHash = await bcrypt.hash('rescuerpassword123', 10);
         if (rescuerRows.length === 0) {
-            const rescuerId = crypto.randomUUID();
+            const rescuerId = 'e09e4fad-69e9-4c6d-ad2a-fa95f1572df2';
             await pool.execute(
-                `INSERT INTO users (id, name, email, phone, password, role, location) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [rescuerId, 'Field Rescuer 1', 'rescuer@example.com', '1111111111', rescuerHash, 'rescuer', 'City Center']
+                `INSERT INTO users (id, name, email, phone, password, role, location) VALUES (?, ?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE password = VALUES(password), role = VALUES(role), name = VALUES(name)`,
+                [rescuerId, 'Field Rescuer 1', 'rescuer@gmail.com', '9876543210', rescuerHash, 'rescuer', 'Downtown / Central Hub']
             );
             console.log('Default rescuer seeded.');
         } else {
-            await pool.execute('UPDATE users SET password = ?, role = "rescuer" WHERE email = ?', [rescuerHash, 'rescuer@example.com']);
+            await pool.execute('UPDATE users SET password = ?, role = "rescuer", name = "Field Rescuer 1" WHERE email = ?', [rescuerHash, 'rescuer@gmail.com']);
+        }
+
+        // Rescuer Sarah
+        const [sarahRows] = await pool.execute('SELECT id FROM users WHERE email = ?', ['sarah.rescuer@gmail.com']);
+        if (sarahRows.length === 0) {
+            await pool.execute(
+                `INSERT INTO users (id, name, email, phone, password, role, location) VALUES (?, ?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE password = VALUES(password), role = VALUES(role), name = VALUES(name)`,
+                ['f3889deb-b7c6-4849-8ea0-1248acc3a9ef', 'Rescuer Sarah', 'sarah.rescuer@gmail.com', '9876543211', rescuerHash, 'rescuer', 'North Zone Shelter']
+            );
+        }
+
+        // Rescuer David
+        const [davidRows] = await pool.execute('SELECT id FROM users WHERE email = ?', ['david.rescuer@gmail.com']);
+        if (davidRows.length === 0) {
+            await pool.execute(
+                `INSERT INTO users (id, name, email, phone, password, role, location) VALUES (?, ?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE password = VALUES(password), role = VALUES(role), name = VALUES(name)`,
+                ['9d47bb3a-cb5c-4845-a587-ceb5638b6cc4', 'Rescuer David (Veterinary Aid)', 'david.rescuer@gmail.com', '9876543212', rescuerHash, 'rescuer', 'South District Clinic']
+            );
         }
     } catch (err) {
         console.error('Error during auto-initialization of DB tables:', err.message);

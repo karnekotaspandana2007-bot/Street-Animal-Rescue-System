@@ -78,48 +78,48 @@ INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `locati
 VALUES (
     '59ad1ac1-450c-4d68-a18d-977b1aec3665', 
     'System Admin', 
-    'admin@example.com', 
+    'admin@gmail.com', 
     '0000000000', 
-    '$2a$10$6xuBvRcbWPi2IjPUsf2e3eTUKj7IOZyXhZwxUJ/rkdQUKNZ2c1p2e', 
+    '$2a$10$d5pVIpZiQzqXlVWb6QiKbezxVDgV0Lna96UkMGUjq5kgrMauGagMy', 
     'admin', 
     'HQ'
-) ON DUPLICATE KEY UPDATE `email` = `email`;
+) ON DUPLICATE KEY UPDATE `password` = VALUES(`password`), `role` = VALUES(`role`), `name` = VALUES(`name`);
 
 -- Rescuer 1 (Password: rescuerpassword123)
 INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `location`)
 VALUES (
     'e09e4fad-69e9-4c6d-ad2a-fa95f1572df2', 
     'Field Rescuer 1', 
-    'rescuer@example.com', 
+    'rescuer@gmail.com', 
     '9876543210', 
-    '$2a$10$CJcEU8ZZNlxFAwGpHoWiaeLWviYAiTCsdevUtzlfH63cVufsqG5Am', 
+    '$2a$10$VP4LxCO3a5H13gnXSYL9CONzYQe5nnTSAdsJwRbs83c0f9TuNDwmy', 
     'rescuer', 
     'Downtown / Central Hub'
-) ON DUPLICATE KEY UPDATE `email` = `email`;
+) ON DUPLICATE KEY UPDATE `password` = VALUES(`password`), `role` = VALUES(`role`), `name` = VALUES(`name`);
 
 -- Rescuer 2 (Password: rescuerpassword123)
 INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `location`)
 VALUES (
     'f3889deb-b7c6-4849-8ea0-1248acc3a9ef', 
     'Rescuer Sarah', 
-    'sarah.rescuer@example.com', 
+    'sarah.rescuer@gmail.com', 
     '9876543211', 
-    '$2a$10$sKev9TRAZdx4si6yYcZ48.TsoVTmagZFbNLBpqZVeLHWngs1HmKLu', 
+    '$2a$10$VP4LxCO3a5H13gnXSYL9CONzYQe5nnTSAdsJwRbs83c0f9TuNDwmy', 
     'rescuer', 
     'North Zone Shelter'
-) ON DUPLICATE KEY UPDATE `email` = `email`;
+) ON DUPLICATE KEY UPDATE `password` = VALUES(`password`), `role` = VALUES(`role`), `name` = VALUES(`name`);
 
 -- Rescuer 3 (Password: rescuerpassword123)
 INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `location`)
 VALUES (
     '9d47bb3a-cb5c-4845-a587-ceb5638b6cc4', 
     'Rescuer David (Veterinary Aid)', 
-    'david.rescuer@example.com', 
+    'david.rescuer@gmail.com', 
     '9876543212', 
-    '$2a$10$cqeZcTEfKQCc7gsqhAfJkO1p2oIiJ8CUMQWAHV6AmRsyGHYo.MRzC', 
+    '$2a$10$VP4LxCO3a5H13gnXSYL9CONzYQe5nnTSAdsJwRbs83c0f9TuNDwmy', 
     'rescuer', 
     'South District Clinic'
-) ON DUPLICATE KEY UPDATE `email` = `email`;
+) ON DUPLICATE KEY UPDATE `password` = VALUES(`password`), `role` = VALUES(`role`), `name` = VALUES(`name`);
 
 -- =======================================================
 -- 4. Verification Queries

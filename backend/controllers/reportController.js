@@ -74,7 +74,8 @@ const getReport = async (req, res) => {
         }
 
         // Make sure user owns report (unless rescuer or admin)
-        if (report.userId !== req.user.id && req.user.role === 'user') {
+        const ownerId = report.userId?._id || report.userId;
+        if (ownerId !== req.user.id && req.user.role === 'user') {
             return res.status(401).json({ success: false, message: 'Not authorized to view this report' });
         }
 
@@ -108,7 +109,8 @@ const updateReport = async (req, res) => {
         }
 
         // Make sure user owns report
-        if (report.userId !== req.user.id) {
+        const ownerId = report.userId?._id || report.userId;
+        if (ownerId !== req.user.id) {
             return res.status(401).json({ success: false, message: 'Not authorized to update this report' });
         }
 
@@ -137,7 +139,8 @@ const deleteReport = async (req, res) => {
         }
 
         // Make sure user owns report
-        if (report.userId !== req.user.id) {
+        const ownerId = report.userId?._id || report.userId;
+        if (ownerId !== req.user.id) {
             return res.status(401).json({ success: false, message: 'Not authorized to delete this report' });
         }
 

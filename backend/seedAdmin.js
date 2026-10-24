@@ -7,7 +7,7 @@ const seedAdmin = async () => {
     try {
         console.log('Connecting to MySQL for seeding...');
 
-        const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@gmail.com';
         const adminPassword = process.env.ADMIN_PASSWORD || 'adminpassword123';
 
         // Check if admin already exists

@@ -83,7 +83,7 @@ Smart-Street-Animal-Rescue-System/
    ```cmd
    npm run seed-admin
    ```
-   *Note: Default admin: `admin@example.com` / `adminpassword123`.*
+   *Note: Default admin: `admin@gmail.com` / `adminpassword123`.*
 4. Start the Node.js server:
    ```cmd
    npm run dev
@@ -107,8 +107,8 @@ We DO NOT use `file://` to open the frontend because the Camera and GPS APIs req
 1. **Register as a User:** Go to Register page, create an account, then Login.
 2. **Report Animal:** In the User Dashboard, click "Report an Animal".
 3. **Use Features:** Click "Open Camera" to take a photo. Click "Use My Current Location" to get GPS. Submit the report.
-4. **Admin Verification:** Logout, then login as `admin@example.com` (password: `adminpassword123`). Go to "Manage Reports", find your report, click **Verify**.
-5. **Assign Rescuer:** While in Admin, click **Assign Rescuer**. Select a rescuer from the dropdown (you might need to register a dummy rescuer account first!).
+4. **Admin Verification:** Logout, then login as `admin@gmail.com` (password: `adminpassword123`). Go to "Manage Reports", find your report, click **Verify**.
+5. **Assign Rescuer:** While in Admin, click **Assign Rescuer**. Select a rescuer from the dropdown (default: `rescuer@gmail.com` / `rescuerpassword123`).
 6. **Rescuer Action:** Logout, login as the Rescuer. Go to "Assigned Reports", View Details, click **Start Rescue**, then **Complete Rescue**.
 7. **User Checking:** Login back as the original User, go to "My Reports", and observe the status changed to **Completed**.
 

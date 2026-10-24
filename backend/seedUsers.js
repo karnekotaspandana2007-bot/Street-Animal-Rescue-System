@@ -9,21 +9,21 @@ async function seedUsers() {
         const defaultRescuers = [
             {
                 name: 'Field Rescuer 1',
-                email: 'rescuer@example.com',
+                email: 'rescuer@gmail.com',
                 phone: '9876543210',
                 password: 'rescuerpassword123',
                 location: 'Downtown / Central Hub'
             },
             {
                 name: 'Rescuer Sarah',
-                email: 'sarah.rescuer@example.com',
+                email: 'sarah.rescuer@gmail.com',
                 phone: '9876543211',
                 password: 'rescuerpassword123',
                 location: 'North Zone Shelter'
             },
             {
                 name: 'Rescuer David (Veterinary Aid)',
-                email: 'david.rescuer@example.com',
+                email: 'david.rescuer@gmail.com',
                 phone: '9876543212',
                 password: 'rescuerpassword123',
                 location: 'South District Clinic'

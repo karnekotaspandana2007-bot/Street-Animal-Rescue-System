@@ -21,14 +21,17 @@ function ensureData() {
         }
     }
 
+    // Clean up any legacy example.com users
+    data.users = data.users.filter(u => !u.email || !u.email.toLowerCase().endsWith('@example.com'));
+
     // Check and seed admin
-    let admin = data.users.find(u => u.email && u.email.toLowerCase() === 'admin@example.com');
+    let admin = data.users.find(u => u.email && u.email.toLowerCase() === 'admin@gmail.com');
     const adminHash = bcrypt.hashSync('adminpassword123', 10);
     if (!admin) {
         data.users.push({
             id: '59ad1ac1-450c-4d68-a18d-977b1aec3665',
             name: 'System Admin',
-            email: 'admin@example.com',
+            email: 'admin@gmail.com',
             phone: '0000000000',
             password: adminHash,
             role: 'admin',
@@ -36,19 +39,19 @@ function ensureData() {
             createdAt: new Date().toISOString()
         });
     } else {
-        // Ensure valid hash always matches adminpassword123
         admin.password = adminHash;
         admin.role = 'admin';
+        admin.name = 'System Admin';
     }
 
-    // Check and seed rescuer
-    let rescuer = data.users.find(u => u.email && u.email.toLowerCase() === 'rescuer@example.com');
+    // Check and seed rescuer 1
+    let rescuer = data.users.find(u => u.email && u.email.toLowerCase() === 'rescuer@gmail.com');
     const rescuerHash = bcrypt.hashSync('rescuerpassword123', 10);
     if (!rescuer) {
         data.users.push({
             id: 'e09e4fad-69e9-4c6d-ad2a-fa95f1572df2',
             name: 'Field Rescuer 1',
-            email: 'rescuer@example.com',
+            email: 'rescuer@gmail.com',
             phone: '9876543210',
             password: rescuerHash,
             role: 'rescuer',
@@ -56,9 +59,39 @@ function ensureData() {
             createdAt: new Date().toISOString()
         });
     } else {
-        // Ensure valid hash always matches rescuerpassword123
         rescuer.password = rescuerHash;
         rescuer.role = 'rescuer';
+        rescuer.name = 'Field Rescuer 1';
+    }
+
+    // Check and seed rescuer Sarah
+    let sarah = data.users.find(u => u.email && u.email.toLowerCase() === 'sarah.rescuer@gmail.com');
+    if (!sarah) {
+        data.users.push({
+            id: 'f3889deb-b7c6-4849-8ea0-1248acc3a9ef',
+            name: 'Rescuer Sarah',
+            email: 'sarah.rescuer@gmail.com',
+            phone: '9876543211',
+            password: rescuerHash,
+            role: 'rescuer',
+            location: 'North Zone Shelter',
+            createdAt: new Date().toISOString()
+        });
+    }
+
+    // Check and seed rescuer David
+    let david = data.users.find(u => u.email && u.email.toLowerCase() === 'david.rescuer@gmail.com');
+    if (!david) {
+        data.users.push({
+            id: '9d47bb3a-cb5c-4845-a587-ceb5638b6cc4',
+            name: 'Rescuer David (Veterinary Aid)',
+            email: 'david.rescuer@gmail.com',
+            phone: '9876543212',
+            password: rescuerHash,
+            role: 'rescuer',
+            location: 'South District Clinic',
+            createdAt: new Date().toISOString()
+        });
     }
 
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
@@ -136,7 +169,8 @@ const localPool = {
         }
 
         if (upper.includes('FROM USERS WHERE ID = ?')) {
-            const id = params[0];
+            const rawId = params[0];
+            const id = (typeof rawId === 'object' && rawId !== null) ? (rawId._id || rawId.id) : rawId;
             const found = db.users.filter(u => u.id === id);
             return [found];
         }

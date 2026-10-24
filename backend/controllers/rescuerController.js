@@ -11,7 +11,8 @@ const getAssignedReports = async (req, res) => {
         
         // Populate userId
         for (let report of reports) {
-            const user = await User.findById(report.userId);
+            const reporterId = report.userId?._id || report.userId;
+            const user = await User.findById(reporterId);
             if (user) {
                 report.userId = { _id: user._id, name: user.name, phone: user.phone };
             }
@@ -38,7 +39,8 @@ const getAssignedReport = async (req, res) => {
         }
 
         // Populate userId
-        const user = await User.findById(report.userId);
+        const reporterId = report.userId?._id || report.userId;
+        const user = await User.findById(reporterId);
         if (user) {
             report.userId = { _id: user._id, name: user.name, phone: user.phone };
         }

@@ -20,7 +20,8 @@ class User {
         const id = query.id || query._id;
 
         if (query.email) {
-            const [rows] = await pool.execute('SELECT * FROM users WHERE email = ?', [query.email]);
+            const cleanEmail = String(query.email).trim().toLowerCase();
+            const [rows] = await pool.execute('SELECT * FROM users WHERE email = ?', [cleanEmail]);
             if (rows.length === 0) return null;
             
             const user = rows[0];
@@ -33,7 +34,8 @@ class User {
         }
         
         if (id && query.role) {
-            const [rows] = await pool.execute('SELECT * FROM users WHERE id = ? AND role = ?', [id, query.role]);
+            const cleanId = (typeof id === 'object' && id !== null) ? (id._id || id.id) : id;
+            const [rows] = await pool.execute('SELECT * FROM users WHERE id = ? AND role = ?', [cleanId, query.role]);
             return rows.length > 0 ? { ...rows[0], _id: rows[0].id } : null;
         }
 
@@ -50,7 +52,9 @@ class User {
     }
 
     static async findById(id) {
-        const [rows] = await pool.execute('SELECT * FROM users WHERE id = ?', [id]);
+        const cleanId = (typeof id === 'object' && id !== null) ? (id._id || id.id) : id;
+        if (!cleanId) return null;
+        const [rows] = await pool.execute('SELECT * FROM users WHERE id = ?', [cleanId]);
         if (rows.length === 0) return null;
         
         const user = rows[0];

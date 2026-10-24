@@ -43,13 +43,15 @@ const getAllReports = async (req, res) => {
         // Populate userId and assignedRescuer
         for (let report of reports) {
             if (report.userId) {
-                const user = await User.findById(report.userId);
+                const reporterId = report.userId?._id || report.userId;
+                const user = await User.findById(reporterId);
                 if (user) {
                     report.userId = { _id: user._id, name: user.name, email: user.email, phone: user.phone };
                 }
             }
             if (report.assignedRescuer) {
-                const rescuer = await User.findById(report.assignedRescuer);
+                const rescuerId = report.assignedRescuer?._id || report.assignedRescuer;
+                const rescuer = await User.findById(rescuerId);
                 if (rescuer) {
                     report.assignedRescuer = { _id: rescuer._id, name: rescuer.name, phone: rescuer.phone };
                 }

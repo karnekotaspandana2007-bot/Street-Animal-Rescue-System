@@ -16,15 +16,19 @@ const protect = async (req, res, next) => {
             // Get user from the token
             req.user = await User.findById(decoded.id);
 
-            next();
+            if (!req.user) {
+                return res.status(401).json({ success: false, message: 'User not found or token invalid' });
+            }
+
+            return next();
         } catch (error) {
-            console.error(error);
-            res.status(401).json({ success: false, message: 'Not authorized' });
+            console.error('Token verification failed:', error.message);
+            return res.status(401).json({ success: false, message: 'Not authorized' });
         }
     }
 
     if (!token) {
-        res.status(401).json({ success: false, message: 'Not authorized, no token' });
+        return res.status(401).json({ success: false, message: 'Not authorized, no token' });
     }
 };
 
